@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Unidad 8 – Infracciones, Sanciones y Responsabilidad Legal</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #120a1e;
+    --surface: #1c1030;
+    --card: #221540;
+    --accent: #a78bfa;
+    --accent2: #fb7185;
+    --green: #34d399;
+    --red: #f87171;
+    --yellow: #fbbf24;
+    --text: #f5f0ff;
+    --muted: #c4b5fd;
+    --radius: 18px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Source Sans 3',sans-serif; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:24px 16px;
+    background-image: radial-gradient(ellipse at 50% 0%, rgba(167,139,250,0.12) 0%, transparent 60%);
+  }
+
+  .header { width:100%; max-width:700px; text-align:center; margin-bottom:28px; }
+  .unit-badge { display:inline-block; background:linear-gradient(135deg, var(--accent), var(--accent2)); color:#fff; font-weight:700; font-size:0.75rem; letter-spacing:2px; text-transform:uppercase; padding:5px 16px; border-radius:30px; margin-bottom:12px; }
+  .header h1 { font-family:'Barlow Condensed',sans-serif; font-size:2.4rem; color:#fff; font-weight:900; letter-spacing:0.5px; }
+  .header p { color:var(--muted); font-size:0.9rem; margin-top:5px; }
+  .progress-arc { display:flex; justify-content:center; gap:10px; margin-top:16px; align-items:center; }
+  .arc-item { display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .arc-dot { width:10px; height:10px; border-radius:50%; background:rgba(167,139,250,0.15); transition:all 0.3s; }
+  .arc-dot.active { background:var(--accent); box-shadow:0 0 10px var(--accent); width:14px; height:14px; }
+  .arc-dot.done { background:var(--green); }
+
+  .quiz-card { background:var(--card); border-radius:var(--radius); padding:32px; width:100%; max-width:700px; border:1px solid rgba(167,139,250,0.12); box-shadow:0 8px 50px rgba(0,0,0,0.6); animation:slideIn 0.35s ease; }
+  @keyframes slideIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+  .q-counter { font-size:0.78rem; font-weight:700; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .q-type-badge { display:inline-block; font-size:0.72rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:20px; margin-bottom:14px; background:rgba(167,139,250,0.1); color:var(--accent); border:1px solid rgba(167,139,250,0.25); }
+  .q-text { font-family:'Barlow Condensed',sans-serif; font-size:1.3rem; font-weight:800; line-height:1.4; margin-bottom:24px; color:#fff; letter-spacing:0.3px; }
+
+  /* DRAG TO ORDER */
+  .order-intro { font-size:0.82rem; color:var(--muted); margin-bottom:12px; background:rgba(167,139,250,0.08); padding:10px 14px; border-radius:10px; border-left:3px solid var(--accent); }
+  .order-list { display:flex; flex-direction:column; gap:8px; }
+  .order-item { background:var(--surface); border:1.5px solid rgba(167,139,250,0.12); border-radius:12px; padding:13px 18px; cursor:grab; font-size:0.95rem; font-weight:600; display:flex; align-items:center; gap:12px; transition:all 0.2s; user-select:none; }
+  .order-item:hover:not(.locked) { border-color:rgba(167,139,250,0.35); }
+  .order-item.over { border-color:var(--accent); background:rgba(167,139,250,0.1); transform:scale(1.02); }
+  .order-item.locked { cursor:default; }
+  .order-item.item-correct { border-color:var(--green); background:rgba(52,211,153,0.08); color:var(--green); }
+  .order-item.item-wrong { border-color:var(--red); background:rgba(248,113,113,0.08); color:var(--red); }
+  .drag-num { width:28px; height:28px; border-radius:7px; background:rgba(167,139,250,0.12); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.82rem; color:var(--accent); flex-shrink:0; }
+  .drag-handle { font-size:0.9rem; color:var(--muted); }
+  .btn-check-order { margin-top:14px; width:100%; padding:13px; background:rgba(167,139,250,0.1); border:1.5px solid var(--accent); color:var(--accent); font-family:'Source Sans 3',sans-serif; font-size:0.95rem; font-weight:700; border-radius:11px; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px; transition:all 0.2s; }
+  .btn-check-order:hover { background:rgba(167,139,250,0.18); }
+
+  /* OPTIONS */
+  .options { display:flex; flex-direction:column; gap:10px; }
+  .option { background:var(--surface); border:1.5px solid rgba(167,139,250,0.1); border-radius:12px; padding:14px 18px; cursor:pointer; font-size:0.96rem; font-weight:600; color:var(--text); transition:all 0.2s; display:flex; align-items:center; gap:12px; }
+  .option:hover:not(.disabled) { border-color:var(--accent); background:rgba(167,139,250,0.07); transform:translateX(5px); }
+  .option.correct { border-color:var(--green); background:rgba(52,211,153,0.08); color:var(--green); }
+  .option.wrong { border-color:var(--red); background:rgba(248,113,113,0.08); color:var(--red); }
+  .option.disabled { cursor:default; }
+  .opt-dot { width:28px; height:28px; border-radius:7px; background:rgba(167,139,250,0.1); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.8rem; color:var(--accent); flex-shrink:0; }
+
+  /* TF */
+  .tf-options { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .tf-btn { background:var(--surface); border:2px solid rgba(167,139,250,0.1); border-radius:16px; padding:28px 16px; cursor:pointer; font-family:'Barlow Condensed',sans-serif; font-size:1.1rem; font-weight:800; text-align:center; transition:all 0.25s; }
+  .tf-btn .tf-icon { font-size:2.8rem; display:block; margin-bottom:8px; }
+  .tf-btn.true-btn:hover:not(.disabled) { border-color:var(--green); background:rgba(52,211,153,0.07); color:var(--green); }
+  .tf-btn.false-btn:hover:not(.disabled) { border-color:var(--red); background:rgba(248,113,113,0.07); color:var(--red); }
+  .tf-btn.correct { border-color:var(--green); background:rgba(52,211,153,0.1); color:var(--green); }
+  .tf-btn.wrong { border-color:var(--red); background:rgba(248,113,113,0.1); color:var(--red); }
+
+  /* SCENARIO */
+  .scenario-box { background:rgba(251,113,133,0.07); border:1px solid rgba(251,113,133,0.2); border-radius:12px; padding:16px 18px; margin-bottom:20px; font-size:0.93rem; line-height:1.6; color:#fecdd3; }
+
+  /* IMAGE */
+  .img-grid3 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .img-tile3 { background:var(--surface); border:2px solid rgba(167,139,250,0.1); border-radius:14px; padding:20px 14px; cursor:pointer; text-align:center; transition:all 0.25s; }
+  .img-tile3:hover:not(.disabled) { border-color:var(--accent); transform:scale(1.03); }
+  .img-tile3.correct { border-color:var(--green); background:rgba(52,211,153,0.08); }
+  .img-tile3.wrong { border-color:var(--red); background:rgba(248,113,113,0.08); }
+  .it3e { font-size:2.6rem; display:block; margin-bottom:8px; }
+  .it3l { font-size:0.88rem; font-weight:700; }
+
+  .feedback { margin-top:18px; padding:14px 18px; border-radius:12px; font-size:0.92rem; font-weight:600; line-height:1.5; display:none; }
+  .feedback.show { display:block; animation:fadeIn 0.3s; }
+  .feedback.correct { background:rgba(52,211,153,0.07); border:1px solid rgba(52,211,153,0.3); color:var(--green); }
+  .feedback.wrong { background:rgba(248,113,113,0.07); border:1px solid rgba(248,113,113,0.3); color:#fca5a5; }
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+  .btn-next { margin-top:20px; width:100%; padding:15px; background:linear-gradient(135deg, var(--accent), var(--accent2)); color:#fff; font-family:'Source Sans 3',sans-serif; font-size:1rem; font-weight:700; border:none; border-radius:12px; cursor:pointer; letter-spacing:0.5px; text-transform:uppercase; display:none; transition:all 0.2s; }
+  .btn-next:hover { opacity:0.9; transform:translateY(-2px); box-shadow:0 6px 20px rgba(167,139,250,0.4); }
+  .btn-next.show { display:block; }
+
+  .results { text-align:center; width:100%; max-width:700px; }
+  .results-card { background:var(--card); border-radius:var(--radius); padding:42px 32px; border:1px solid rgba(167,139,250,0.12); box-shadow:0 8px 50px rgba(0,0,0,0.6); }
+  .score-big5 { font-family:'Barlow Condensed',sans-serif; font-size:6rem; font-weight:900; background:linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; line-height:1; }
+  .score-sub5 { font-size:0.9rem; color:var(--muted); margin-bottom:16px; }
+  .res-title { font-family:'Barlow Condensed',sans-serif; font-size:2.2rem; font-weight:900; color:#fff; margin-bottom:8px; }
+  .res-msg { color:var(--muted); font-size:0.97rem; margin-bottom:28px; line-height:1.6; }
+  .btn-restart { background:linear-gradient(135deg, var(--accent), var(--accent2)); color:#fff; border:none; padding:14px 36px; border-radius:12px; font-family:'Source Sans 3',sans-serif; font-size:1rem; font-weight:700; cursor:pointer; text-transform:uppercase; transition:all 0.2s; }
+  .btn-restart:hover { opacity:0.9; transform:translateY(-2px); }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="unit-badge">⚖️ Unidad 8</div>
+  <h1>Infracciones, Sanciones y Responsabilidad Legal</h1>
+  <p>COIP · LOTTTSV · Protocolo post-accidente · SOAT</p>
+  <div class="progress-arc" id="arcRow">
+    <div class="arc-item"><div class="arc-dot active" id="arc0"></div></div>
+    <div class="arc-item"><div class="arc-dot" id="arc1"></div></div>
+    <div class="arc-item"><div class="arc-dot" id="arc2"></div></div>
+    <div class="arc-item"><div class="arc-dot" id="arc3"></div></div>
+    <div class="arc-item"><div class="arc-dot" id="arc4"></div></div>
+  </div>
+</div>
+
+<div class="quiz-card" id="quizCard"></div>
+<div class="results hidden" id="resultsScreen"></div>
+
+<script>
+const questions = [
+  {
+    type: 'order',
+    counter: 'Pregunta 1 de 5',
+    badge: '🔢 Ordena el protocolo',
+    question: 'Acaba de ocurrir un accidente. Arrastra y ordena correctamente los PRIMEROS 4 pasos del protocolo post-accidente:',
+    intro: '👆 Arrastra los pasos para ordenarlos correctamente del 1 al 4',
+    items: [
+      { text: '📞 Llamar al 911. Dar ubicación exacta del accidente', order: 3 },
+      { text: '🚛 DETENER el vehículo inmediatamente. Jamás huir', order: 0 },
+      { text: '🔺 PROTEGER la zona: luces de emergencia + triángulos a 50m', order: 1 },
+      { text: '🤕 VERIFICAR heridos: no mover a lesionados salvo peligro inminente', order: 2 }
+    ],
+    feedback: '✅ Orden correcto: 1) Detener el vehículo 2) Proteger la zona 3) Verificar heridos 4) Llamar al 911. Recuerda: NUNCA huir del lugar — agrava la pena en un tercio.'
+  },
+  {
+    type: 'multiple',
+    counter: 'Pregunta 2 de 5',
+    badge: '⚖️ Tipos de infracción',
+    question: '¿Cuál es la diferencia entre una CONTRAVENCIÓN y un DELITO de tránsito según el COIP y la LOTTTSV?',
+    options: [
+      'La contravención solo aplica a conductores no profesionales; el delito aplica a todos',
+      'La contravención siempre implica retención del vehículo; el delito implica solo multa',
+      'La contravención es infracción sin causar lesiones/muerte (multa/suspensión); el delito implica daños graves y puede derivar en prisión',
+      'No existe diferencia: ambas se procesan de la misma manera ante la ANT'
+    ],
+    correct: 2,
+    feedback: '✅ ¡Correcto! Las contravenciones se clasifican en leves, graves y muy graves. Los delitos (muerte, lesiones, estado etílico grave) se juzgan ante juez penal por el COIP y pueden resultar en privación de libertad e inhabilitación profesional.'
+  },
+  {
+    type: 'truefalse',
+    counter: 'Pregunta 3 de 5',
+    badge: '✅ Verdadero o Falso',
+    question: 'Si un conductor causa un accidente y huye del lugar, la pena correspondiente a la infracción original se INCREMENTA en un tercio adicional.',
+    correct: true,
+    feedback: '✅ VERDADERO. La fuga del lugar del accidente es un AGRAVANTE PENAL. La pena original aumenta en un tercio. Por eso el primer paso del protocolo es DETENER el vehículo y jamás huir, independientemente de las circunstancias.'
+  },
+  {
+    type: 'scenario',
+    counter: 'Pregunta 4 de 5',
+    badge: '📍 Caso práctico — COIP',
+    scenario: '⚖️ Carlos, conductor Tipo E, conduce bajo efectos del alcohol con un nivel de 0.4 g/L. Es su primera infracción. ¿Qué sanción establece el COIP para este nivel?',
+    question: '¿Cuál es la sanción correcta según la normativa ecuatoriana vigente?',
+    options: [
+      'Solo amonestación verbal y pago de multa reducida por ser primera vez',
+      'Multa, suspensión de licencia por 60 días y trabajo comunitario',
+      'Prisión de 1 a 3 años y suspensión de licencia por 3 años',
+      'Inhabilitación profesional definitiva e indemnización a la ANT'
+    ],
+    correct: 1,
+    feedback: '✅ ¡Correcto! Entre 0.3 y 0.8 g/L (primera vez): multa, suspensión de licencia por 60 días y trabajo comunitario. Más de 0.8 g/L: 1-3 años de prisión. Reincidencia o accidente con heridos: 3-5 años. Recuerda: para profesionales el límite es 0.0 g/L.'
+  },
+  {
+    type: 'image',
+    counter: 'Pregunta 5 de 5',
+    badge: '🖼️ ¿Qué cubre el SOAT?',
+    question: 'El SOAT (Seguro Obligatorio de Accidentes de Tránsito) es obligatorio para todos los vehículos. ¿Qué cubre y qué NO cubre?',
+    options: [
+      { emoji: '🏥', label: 'SÍ cubre: Atención médica y gastos funerarios de las víctimas' },
+      { emoji: '🚗💥🚗', label: 'SÍ cubre: Daños materiales entre vehículos involucrados' },
+      { emoji: '💰', label: 'SÍ cubre: Indemnización por lucro cesante del conductor' },
+      { emoji: '🏠', label: 'SÍ cubre: Daños a propiedades privadas afectadas en el accidente' }
+    ],
+    correct: 0,
+    feedback: '✅ ¡Correcto! El SOAT cubre ATENCIÓN MÉDICA y gastos funerarios hasta los montos que establece la ANT. NO cubre daños materiales entre vehículos (para eso se requiere seguro adicional), ni daños a terceros propietarios. Un vehículo Tipo E sin SOAT no puede circular legalmente.'
+  }
+];
+
+let current = 0, score = 0, answered = false;
+let dragOrder = [];
+let dragSrcIdx = null;
+
+function updateArcs() {
+  for (let i = 0; i < 5; i++) {
+    const a = document.getElementById(`arc${i}`);
+    if (i < current) a.className = 'arc-dot done';
+    else if (i === current) a.className = 'arc-dot active';
+    else a.className = 'arc-dot';
+  }
+}
+
+function render() {
+  const q = questions[current];
+  answered = false;
+  updateArcs();
+  const card = document.getElementById('quizCard');
+  let html = `<div class="q-counter">${q.counter}</div><div class="q-type-badge">${q.badge}</div>`;
+  if (q.scenario) html += `<div class="scenario-box">${q.scenario}</div>`;
+  html += `<div class="q-text">${q.question}</div>`;
+
+  if (q.type === 'order') {
+    dragOrder = q.items.map((_, i) => i);
+    html += `<div class="order-intro">${q.intro}</div><div class="order-list" id="orderList">`;
+    q.items.forEach((item, i) => {
+      html += `<div class="order-item" draggable="true" id="orderItem${i}" data-idx="${i}">
+        <span class="drag-handle">⠿</span>
+        <div class="drag-num" id="orderNum${i}">${i + 1}</div>
+        <span>${item.text}</span>
+      </div>`;
+    });
+    html += `</div><button class="btn-check-order" onclick="checkOrder()">✔ VERIFICAR ORDEN</button>`;
+  } else if (q.type === 'multiple' || q.type === 'scenario') {
+    const lets = ['A','B','C','D'];
+    html += `<div class="options">`;
+    q.options.forEach((o, i) => html += `<div class="option" onclick="checkAns(${i})" id="opt${i}"><div class="opt-dot">${lets[i]}</div>${o}</div>`);
+    html += `</div>`;
+  } else if (q.type === 'truefalse') {
+    html += `<div class="tf-options">
+      <div class="tf-btn true-btn" onclick="checkTF(true)" id="tfTrue"><span class="tf-icon">✅</span>VERDADERO</div>
+      <div class="tf-btn false-btn" onclick="checkTF(false)" id="tfFalse"><span class="tf-icon">❌</span>FALSO</div>
+    </div>`;
+  } else if (q.type === 'image') {
+    html += `<div class="img-grid3">`;
+    q.options.forEach((o, i) => html += `<div class="img-tile3" onclick="checkAns(${i})" id="opt${i}"><span class="it3e">${o.emoji}</span><div class="it3l">${o.label}</div></div>`);
+    html += `</div>`;
+  }
+
+  html += `<div class="feedback" id="feedbackBox"></div>
+    <button class="btn-next" id="btnNext" onclick="nextQ()">${current < questions.length - 1 ? '→ SIGUIENTE' : '🏁 VER RESULTADOS'}</button>`;
+  card.innerHTML = html;
+
+  if (q.type === 'order') initDrag();
+}
+
+function initDrag() {
+  const items = document.querySelectorAll('.order-item');
+  items.forEach(item => {
+    item.addEventListener('dragstart', e => { dragSrcIdx = parseInt(item.dataset.idx); item.style.opacity = '0.4'; });
+    item.addEventListener('dragend', e => { item.style.opacity = '1'; });
+    item.addEventListener('dragover', e => { e.preventDefault(); item.classList.add('over'); });
+    item.addEventListener('dragleave', e => { item.classList.remove('over'); });
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      item.classList.remove('over');
+      const targetIdx = parseInt(item.dataset.idx);
+      if (dragSrcIdx === targetIdx) return;
+      const list = document.getElementById('orderList');
+      const srcEl = document.getElementById(`orderItem${dragSrcIdx}`);
+      const tgtEl = document.getElementById(`orderItem${targetIdx}`);
+      const allItems = [...list.children];
+      const srcPos = allItems.indexOf(srcEl);
+      const tgtPos = allItems.indexOf(tgtEl);
+      if (srcPos < tgtPos) list.insertBefore(srcEl, tgtEl.nextSibling);
+      else list.insertBefore(srcEl, tgtEl);
+    });
+  });
+}
+
+function checkOrder() {
+  if (answered) return; answered = true;
+  const q = questions[current];
+  const list = document.getElementById('orderList');
+  const currentOrder = [...list.children].map(el => parseInt(el.dataset.idx));
+  const correctOrder = [...q.items].map((_, i) => i).sort((a, b) => q.items[a].order - q.items[b].order);
+  const ok = JSON.stringify(currentOrder) === JSON.stringify(correctOrder);
+  if (ok) score++;
+  [...list.children].forEach((el, pos) => {
+    const itemIdx = parseInt(el.dataset.idx);
+    el.classList.add('locked');
+    el.setAttribute('draggable', 'false');
+    const isCorrectPos = itemIdx === correctOrder[pos];
+    el.classList.add(isCorrectPos ? 'item-correct' : 'item-wrong');
+  });
+  document.querySelector('.btn-check-order').style.display = 'none';
+  showFB(ok, q.feedback);
+}
+
+function checkAns(sel) {
+  if (answered) return; answered = true;
+  const q = questions[current];
+  const ok = sel === q.correct;
+  if (ok) score++;
+  document.querySelectorAll('.option,.img-tile3').forEach(e => e.classList.add('disabled'));
+  document.getElementById(`opt${sel}`).classList.add(ok ? 'correct' : 'wrong');
+  if (!ok) document.getElementById(`opt${q.correct}`).classList.add('correct');
+  showFB(ok, q.feedback);
+}
+
+function checkTF(val) {
+  if (answered) return; answered = true;
+  const q = questions[current];
+  const ok = val === q.correct;
+  if (ok) score++;
+  ['tfTrue','tfFalse'].forEach(id => document.getElementById(id).classList.add('disabled'));
+  document.getElementById(val ? 'tfTrue' : 'tfFalse').classList.add(ok ? 'correct' : 'wrong');
+  if (!ok) document.getElementById(q.correct ? 'tfTrue' : 'tfFalse').classList.add('correct');
+  showFB(ok, q.feedback);
+}
+
+function showFB(ok, text) {
+  const fb = document.getElementById('feedbackBox');
+  fb.className = `feedback show ${ok ? 'correct' : 'wrong'}`;
+  fb.innerHTML = text;
+  document.getElementById('btnNext').classList.add('show');
+}
+
+function nextQ() {
+  current++;
+  if (current >= questions.length) showResults();
+  else render();
+}
+
+function showResults() {
+  for (let i = 0; i < 5; i++) document.getElementById(`arc${i}`).className = 'arc-dot done';
+  document.getElementById('quizCard').classList.add('hidden');
+  const pct = Math.round((score / questions.length) * 100);
+  const msg = pct === 100 ? '🏆 ¡Excelente! Dominas la normativa legal del conductor Tipo E.' :
+              pct >= 80 ? '🎯 ¡Muy bien! Buen manejo del marco legal y el protocolo post-accidente.' :
+              pct >= 60 ? '📚 Bien. Repasa el protocolo post-accidente y la clasificación de infracciones.' :
+              '🔄 Revisa la Unidad 8. El conocimiento del COIP y el protocolo de accidentes es fundamental.';
+  document.getElementById('resultsScreen').classList.remove('hidden');
+  document.getElementById('resultsScreen').innerHTML = `
+    <div class="results-card">
+      <div class="score-big5">${score}/${questions.length}</div>
+      <div class="score-sub5">${pct}% de respuestas correctas</div>
+      <div class="res-title">Resultado Final — Unidad 8</div>
+      <div class="res-msg">${msg}</div>
+      <button class="btn-restart" onclick="restart()">↺ Intentar de nuevo</button>
+    </div>`;
+}
+function restart() {
+  current = 0; score = 0;
+  document.getElementById('quizCard').classList.remove('hidden');
+  document.getElementById('resultsScreen').classList.add('hidden');
+  render();
+}
+render();
+</script>
+</body>
+</html>
